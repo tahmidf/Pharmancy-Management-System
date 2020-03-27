@@ -1,0 +1,469 @@
+<%include header%>
+
+
+<script>
+
+var alert_product=0;
+var pro_name;
+var pro_id=0;
+var data_product = [];
+var row;
+var stock;
+var rem;
+
+
+   
+function button_disable() {
+//    document.getElementById("BtnSave").class ="";
+    document.getElementById("BtnSave").disabled = true;
+}
+function button_enable() {
+//    document.getElementById("BtnSave").class ="";
+    document.getElementById("BtnSave").disabled = false;
+}
+window.onload = button_disable;
+
+function select_pro_gtter(selTag){
+  pro_name = selTag.options[selTag.selectedIndex].text;
+
+ split_value = selTag.options[selTag.selectedIndex].value;
+  //console.log(pro_id);
+  
+    var split = split_value.split(",");
+            pro_id = split[0];
+            availableStock = split[1];
+            
+   if(pro_id!="undefined")
+   alert_product=1;
+   else
+   alert_product=0;
+   
+   
+       document.getElementById('display_available_product_name').innerHTML = pro_name;
+       document.getElementById('display_available_stock').innerHTML = availableStock;
+       document.getElementById('perPrice').value=split[2];
+
+}
+  function show_product(r) {
+      document.getElementById('pro_name_new').disabled=true;
+
+      var i = r.parentNode.parentNode.rowIndex;
+      row = i;
+          
+      document.getElementById('pro_name_new').value = data_product[row-1][0];
+      document.getElementById('quantity_new').value = data_product[row-1][2];
+      document.getElementById('price_new').value = data_product[row-1][3];
+
+        
+   }
+   function saveData(){
+         var quantity = document.getElementById('quantity_new').value;
+         if(parseInt(quantity)>parseInt(data_product[row-1][4]))
+                 alert("Product out of stock");
+                 else
+                 {
+                data_product[row - 1][2] = document.getElementById('quantity_new').value;
+                data_product[row - 1][3] = document.getElementById('price_new').value;
+
+                document.getElementById("hist_table").rows[row].cells[2].innerHTML = data_product[row - 1][2] * data_product[row - 1][3];
+                document.getElementById("hist_table").rows[row].cells[1].innerHTML = data_product[row - 1][2];
+}
+ }
+
+function array_data(){
+
+      var quantity = document.getElementById('quantity').value;
+      var value = parseInt(quantity);
+  if(alert_product==0)
+  alert("Select Product");
+else{
+    if (availableStock == 0 || value > availableStock)
+    alert("Out of stock Product Please check");
+   else {
+
+  if(productCheckPreviousEntry(pro_id)) {
+
+    button_enable();
+     var quantity = document.getElementById('quantity').value;
+     var price = document.getElementById('perPrice').value;
+
+
+
+ data_product.push([pro_name,pro_id,quantity,price,availableStock]);
+
+var table = document.getElementById("hist_table");
+
+var row = table.insertRow(-1);
+
+var cell1 = row.insertCell(0);
+var cell2 = row.insertCell(1);
+var cell3 = row.insertCell(2);
+var cell4 = row.insertCell(3);
+var s ="<a href='#editModal' role='button' data-toggle='modal' class='btn btn-primary btn-sm' onclick='show_product(this)'><i class='icon-pencil '></i></a><button class='btn btn-danger btn-sm' onclick='delete_product(this);'><i class='icon-trash'></i></button>"
+
+cell1.innerHTML = pro_name;
+cell3.innerHTML = quantity*price;
+cell2.innerHTML = quantity;
+cell4.innerHTML =  s;
+document.getElementById('quantity').value="1";
+document.getElementById('perPrice').value="0";
+document.getElementById('totalPrice').value="0";
+}
+
+else {
+  alert("Product already added! please Check");
+
+}
+}
+}
+}
+
+function multiply()
+ {
+
+    var textValue1 = document.getElementById('quantity').value;
+    var textValue2 = document.getElementById('perPrice').value;
+
+
+    document.getElementById('totalPrice').value = textValue1 * textValue2;
+
+
+ }
+
+ function delete_product(r){
+   var chk=confirm("Are You Sure to Delete This?");
+   if(chk)
+   {
+
+var i = r.parentNode.parentNode.rowIndex;
+document.getElementById("hist_table").deleteRow(i);
+
+ data_product.splice(i-1,1);
+
+     }
+     else{
+     }
+ }
+ function saveSale() {
+
+  for(var i=0;i<data_product.length;i++){
+      
+     var sale = {
+    sale_product:"",
+    sale_quantity:null,
+    sale_price: null,
+    sale_total: null
+
+  };
+
+  sale.sale_product= data_product[i][0]; 
+  sale.sale_quantity= data_product[i][2]; 
+  sale.sale_price= data_product[i][3]; 
+  sale.sale_total= data_product[i][3]*data_product[i][2]; 
+   
+   //Post Sale to DB
+
+      $.ajax({
+      method:"POST",
+      url:'/api/sales',
+      data: sale
+    }).done(function(response){
+        //alert(response._id);
+     
+          }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+    
+    //updating Stock
+    var product = {
+    product_stock: 0
+    };
+
+  product.product_stock =  data_product[i][4] - data_product[i][2];
+  
+ //updating to product stock
+      $.ajax({
+      method:"PUT",
+      url:'/api/products/edit/'+data_product[i][1],
+      data: product
+    }).done(function(response){
+     
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+    
+    
+  }
+  alert("The sale has been added");
+  window.location.replace("/new-sale");
+ }
+
+
+ 
+ function productCheckPreviousEntry(proId) {
+     var checker=true;
+     for(var i=0;i<data_product.length;i++){
+         if(data_product[i][1]==proId)
+         checker=false;
+
+     }
+     if(checker==false)
+         return false;
+     else return true;
+
+
+ }
+
+
+
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        <h1> New Sale</h1>
+
+
+
+
+
+        <div class="box col-md-6">
+         <div class="box-inner">
+            <div class="box-header well" data-original-title="">
+            <h2><i class="glyphicon glyphicon-th"></i>Add details Panel</h2>
+            <div class="box-icon">
+                    <a href="#" class="btn btn-minimize btn-round btn-default"><i
+                            class="glyphicon glyphicon-chevron-up"></i></a>
+                </div>
+            </div>
+ <span class="alert alert-warning" style="float:right;">
+                     <p class="alert-success">Availabity Check</p>
+
+                       <label style="float:left;color:black">Product:   </label>
+                       <label id="display_available_product_name" style=" color:black " ;> 0 </label>
+                       <br>
+
+                       <label style=" float:left ;color:black">Stock Available:  </label>
+
+                       <label id="display_available_stock" style="color:black" ;> 0 </label>
+
+                   </span>
+            <div class="box-content">
+
+                 <table class="table table-condensed">
+                  <tbody>
+
+                    <tr>
+                        <td><span >Product Name:</span> </td>
+
+                        <td>
+                          <select id="productId"  onchange="select_pro_gtter(this)">
+                               <option>Select Category Name..</option>
+                        
+                            </select>
+                        </td>
+
+
+
+                     </tr>
+                     <tr>
+                       <td><span >Quantity</span> </td>
+                       <td><input type="number" min="1" id="quantity" onkeyup="multiply()" onclick="multiply()" value="1" class="span6 " /></td>
+
+
+
+
+
+                     </tr>
+                     <tr>
+                       <td><span >Per Price</span>
+                       <td><input type="number" min="0" id="perPrice" onkeyup="multiply()" onclick="multiply()" value="0" class="span6 " /></td>
+
+
+
+
+                     </tr>
+
+                     <tr>
+                       <td><span >Total Price</span>
+                       <td><input type="number" min="0" id="totalPrice" value="0" class="span6 " /></td>
+
+
+
+
+                     </tr>
+
+
+
+
+
+                  </tbody>
+
+
+
+              </table>
+
+
+
+             <button id="btnSave" onclick="array_data()" class="btn btn-success btn-sm">Add info</button>
+
+
+               </div>
+
+
+
+               </div>
+             </div>
+             <div class="box col-md-6">
+                    <div class="box-inner">
+                        <div class="box-header well" data-original-title="">
+                            <h2><i class="glyphicon glyphicon-list-alt"></i> Information</h2>
+
+                            <div class="box-icon">
+                                <a href="#" class="btn btn-minimize btn-round btn-default"><i
+                                        class="glyphicon glyphicon-chevron-up"></i></a>
+                                <a href="#" class="btn btn-close btn-round btn-default"><i
+                                        class="glyphicon glyphicon-remove"></i></a>
+                            </div>
+                        </div>
+                              
+                        <div class="box-content">
+                          <table id="hist_table" class="table table-striped">
+                              <thead>
+                                  <tr>
+                                    <th><i class="icon-save"></i> Product</th>
+                                      <th><i class="icon-bullhorn"></i> Quantity</th>
+                                      <th><i class="icon-usd"></i> Total Price</th>
+                                      <th>Action</th>
+                                    </tr>
+                              </thead>
+                              <tbody>
+
+
+
+                              </tbody>
+
+                              <a href="#myModal" role="button" id="BtnSave"
+                                 class="btn btn-primary btn-sm" data-toggle="modal">Save Sale</a>
+
+
+
+                          </table>
+                         </div>
+
+                    </div>
+                </div>
+
+              </div>
+
+              <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                   aria-hidden="true">
+
+                  <div class="modal-dialog">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                              <h3 id="myModalLabel">Confirmation</h3>
+                          </div>
+                          <div class="modal-body">
+                            <span class="alert"> Are You sure save all the data?</span>
+                          </div>
+                          <div class="modal-footer">
+                              <button class="btn btn-sm" data-dismiss="modal" aria-hidden="true">Close</button>
+
+                              <a href="" role="button" data-dismiss="modal" onclick="saveSale()"  id="BtnSave" class="btn btn-primary btn-sm" data-toggle="modal">Save</a>
+                          </div>
+
+
+                      </div>
+                  </div>
+
+              </div>
+              <div id="editModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h3 id="myModalLabel">Product details</h3>
+                        </div>
+                        <div class="modal-body">
+
+                            <table class="table table-striped">
+                                <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">Product Name:</span></td>
+                                    <td><input id="pro_name_new" type="text" placeholder=""></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">Quantity:</span></td>
+                                    <td><input id="quantity_new" type="text"placeholder=""></td>
+
+                                </tr>
+                                 <tr>
+                                    <td></td>
+                                    <td><span class="">Price:</span></td>
+                                    <td><input id="price_new" type="text"placeholder=""></td>
+
+                                </tr>
+                               
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-sm" data-dismiss="modal" aria-hidden="true">Close</button>
+                            <button data-dismiss="modal" onclick="saveData()" aria-hidden="true"
+                                    class="btn btn-primary btn-sm">Save changes
+                            </button>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+
+
+
+            </div>
+        </div>
+
+<%include footer%>
+
+<script src="/vendor/ejs_production.js"></script>
+<script>
+   $(document).ready(function() {
+
+
+  $.ajax({
+      url: '/api/products',
+      method: "GET",
+      success: function(data) {
+         
+           $.each(data,function(i,data){
+			   $("#productId").append('<option value="'+data._id+','+data.product_stock+','+data.productprice+'">'+data.product_name+'</option>');
+			});
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+  });
+
+  
+});
+ 
+</script>
+</html>

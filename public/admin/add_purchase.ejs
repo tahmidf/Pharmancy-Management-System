@@ -1,0 +1,421 @@
+<%include header%>
+
+
+<script>
+
+var alert_product=0;
+var alert_supplier=0;
+var pro_name;
+var pro_id=0;
+var Supplier_name;
+var supplierId;
+var data_product = [];
+var row;
+var stock;
+
+   
+function button_disable() {
+//    document.getElementById("BtnSave").class ="";
+    document.getElementById("BtnSave").disabled = true;
+}
+function button_enable() {
+//    document.getElementById("BtnSave").class ="";
+    document.getElementById("BtnSave").disabled = false;
+}
+window.onload = button_disable;
+
+function select_pro_gtter(selTag){
+  pro_name = selTag.options[selTag.selectedIndex].text;
+
+  pro_id = selTag.options[selTag.selectedIndex].value;
+  //console.log(pro_id);
+   if(pro_id!="undefined")
+   alert_product=1;
+   else
+   alert_product=0;
+
+
+}
+  function select_supp_gtter(selTag){
+    Supplier_name = selTag.options[selTag.selectedIndex].text;
+    supplierId= selTag.options[selTag.selectedIndex].value;
+     if(supplierId!="undefined")
+     alert_supplier=1;
+     else
+     alert_supplier=0;
+
+  }
+  
+function array_data(){
+
+  if(alert_supplier==0||alert_product==0)
+  alert("Select Supplier And Product");
+else{
+
+  if(productCheckPreviousEntry(pro_id)) {
+
+    button_enable();
+ var quantity = document.getElementById('quantity').value;
+ var price = document.getElementById('perPrice').value;
+
+
+
+ data_product.push([pro_name,pro_id,Supplier_name,supplierId,quantity,price]);
+
+var table = document.getElementById("hist_table");
+
+var row = table.insertRow(-1);
+
+var cell1 = row.insertCell(0);
+var cell2 = row.insertCell(1);
+var cell3 = row.insertCell(2);
+var cell4 = row.insertCell(3);
+var s ='<button class="btn btn-danger btn-sm" onclick="delete_product(this);"><i class="icon-trash "></i></button>'
+
+var cell5 = row.insertCell(4);
+cell1.innerHTML = pro_name;
+cell3.innerHTML = quantity*price;
+cell2.innerHTML = quantity;
+cell4.innerHTML = Supplier_name;
+cell5.innerHTML =  s;
+document.getElementById('quantity').value="1";
+document.getElementById('perPrice').value="0";
+document.getElementById('totalPrice').value="0";
+}
+
+else {
+  alert("Product already added! please Check");
+
+}
+}
+}
+
+function multiply()
+ {
+
+    var textValue1 = document.getElementById('quantity').value;
+    var textValue2 = document.getElementById('perPrice').value;
+
+
+    document.getElementById('totalPrice').value = textValue1 * textValue2;
+
+
+ }
+
+ function delete_product(r){
+   var chk=confirm("Are You Sure to Delete This?");
+   if(chk)
+   {
+
+var i = r.parentNode.parentNode.rowIndex;
+document.getElementById("hist_table").deleteRow(i);
+
+ data_product.splice(i-1,1);
+
+     }
+     else{
+     }
+ }
+ function savePurchase() {
+
+  for(var i=0;i<data_product.length;i++){
+      
+     var purchase = {
+    vendorName: "",
+    purchase_productName:"",
+    purchase_quantity: null,
+    purchase_price: null,
+    purchasetotalPrice: null
+
+  };
+  purchase.vendorName= data_product[i][2]; 
+  purchase.purchase_productName= data_product[i][0]; 
+  purchase.purchase_quantity= data_product[i][4]; 
+  purchase.purchase_price= data_product[i][5]; 
+  purchase.purchasetotalPrice= data_product[i][4]*data_product[i][5]; 
+   
+   //Post purchase to DB
+
+      $.ajax({
+      method:"POST",
+      url:'/api/purchases',
+      data: purchase
+    }).done(function(response){
+     
+          }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+    
+    //updating Stock
+    var product = {
+  
+    product_stock: 0
+
+  };
+
+   //getting old stock value
+   var a;
+   $.ajax({
+      url: '/api/products/'+data_product[i][1],
+      method: "GET",
+       async: false,
+      success: function(data) {
+      a = parseInt(data.product_stock);
+      setStock(a);
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+  });
+  product.product_stock = parseInt(stock) + parseInt(data_product[i][4]);
+  
+ //updating to product stock
+      $.ajax({
+      method:"PUT",
+      url:'/api/products/edit/'+data_product[i][1],
+      data: product
+    }).done(function(response){
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+    
+    
+  }
+       alert("The Purchase has been added");
+       window.location.replace("/add_purchase");
+
+
+ }
+ function setStock(a){
+  stock = a;   
+ }
+
+ 
+ function productCheckPreviousEntry(proId) {
+     var checker=true;
+     for(var i=0;i<data_product.length;i++){
+         if(data_product[i][1]==proId)
+         checker=false;
+
+     }
+     if(checker==false)
+         return false;
+     else return true;
+
+
+ }
+
+
+
+</script>
+
+<div class="row-fluid">
+    <div class="span12">
+        <h1>ADD PURCHASE</h1>
+
+
+
+
+
+        <div class="box col-md-6">
+         <div class="box-inner">
+            <div class="box-header well" data-original-title="">
+            <h2><i class="glyphicon glyphicon-th"></i>Add details Panel</h2>
+            <div class="box-icon">
+                    <a href="#" class="btn btn-minimize btn-round btn-default"><i
+                            class="glyphicon glyphicon-chevron-up"></i></a>
+                </div>
+            </div>
+
+            <div class="box-content">
+
+                 <table class="table table-condensed">
+                  <tbody>
+
+                    <tr>
+                      <td><span>Supplyer Name:</span> </td>
+                      <td>
+                        <select id="supplyerId"  onchange="select_supp_gtter(this)">
+                             <option>Select Category Name..</option>
+                       
+                          </select>
+                      </td>
+
+
+
+                    </tr>
+                    <tr>
+                        <td><span >Product Name:</span> </td>
+
+                        <td>
+                          <select id="productId"  onchange="select_pro_gtter(this)">
+                               <option>Select Category Name..</option>
+                        
+                            </select>
+                        </td>
+
+
+
+                     </tr>
+                     <tr>
+                       <td><span >Quantity</span> </td>
+                       <td><input type="number" min="1" id="quantity" onkeyup="multiply()" onclick="multiply()" value="1" class="span6 " /></td>
+
+
+
+
+
+                     </tr>
+                     <tr>
+                       <td><span >Per Price</span>
+                       <td><input type="number" min="0" id="perPrice" onkeyup="multiply()" onclick="multiply()" value="0" class="span6 " /></td>
+
+
+
+
+                     </tr>
+
+                     <tr>
+                       <td><span >Total Price</span>
+                       <td><input type="number" min="0" id="totalPrice" value="0" class="span6 " /></td>
+
+
+
+
+                     </tr>
+
+
+
+
+
+                  </tbody>
+
+
+
+              </table>
+
+
+
+             <button id="btnSave" onclick="array_data()" class="btn btn-success btn-sm">Add info</button>
+
+
+               </div>
+
+
+
+               </div>
+             </div>
+             <div class="box col-md-6">
+                    <div class="box-inner">
+                        <div class="box-header well" data-original-title="">
+                            <h2><i class="glyphicon glyphicon-list-alt"></i> Information</h2>
+
+                            <div class="box-icon">
+                                <a href="#" class="btn btn-minimize btn-round btn-default"><i
+                                        class="glyphicon glyphicon-chevron-up"></i></a>
+                                <a href="#" class="btn btn-close btn-round btn-default"><i
+                                        class="glyphicon glyphicon-remove"></i></a>
+                            </div>
+                        </div>
+                        <div class="box-content">
+                          <table id="hist_table" class="table table-striped">
+                              <thead>
+                                  <tr>
+                                    <th><i class="icon-save"></i> Product</th>
+                                      <th><i class="icon-bullhorn"></i> Quantity</th>
+                                      <th><i class="icon-usd"></i> Total Price</th>
+                                      <th><i class=" icon-edit"></i> Supplier</th>
+                                      <th>Action</th>
+                                    </tr>
+                              </thead>
+                              <tbody>
+
+
+
+                              </tbody>
+
+                              <a href="#myModal" role="button" id="BtnSave"
+                                 class="btn btn-primary btn-sm" data-toggle="modal">Save purchase</a>
+
+
+
+                          </table>
+                         </div>
+
+                    </div>
+                </div>
+
+              </div>
+
+              <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                   aria-hidden="true">
+
+                  <div class="modal-dialog">
+                      <div class="modal-content">
+                          <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                              <h3 id="myModalLabel">Confirmation</h3>
+                          </div>
+                          <div class="modal-body">
+                            <span class="alert"> Are You sure save all the data?</span>
+                          </div>
+                          <div class="modal-footer">
+                              <button class="btn btn-sm" data-dismiss="modal" aria-hidden="true">Close</button>
+
+                              <a href="" role="button" data-dismiss="modal" onclick="savePurchase()"  id="BtnSave" class="btn btn-primary btn-sm" data-toggle="modal">Save</a>
+                          </div>
+
+
+                      </div>
+                  </div>
+
+              </div>
+
+
+
+
+
+            </div>
+        </div>
+
+<%include footer%>
+
+<script src="/vendor/ejs_production.js"></script>
+<script>
+   $(document).ready(function() {
+  $.ajax({
+      url: '/api/products',
+      method: "GET",
+      success: function(data) {
+         
+           $.each(data,function(i,data){
+			   $("#productId").append('<option value="'+data._id+'">'+data.product_name+'</option>');
+			});
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+  });
+  
+  $.ajax({
+      url: '/api/vendors',
+      method: "GET",
+      success: function(data) {
+         
+           $.each(data,function(i,data){
+			   $("#supplyerId").append('<option value="'+data._id+'">'+data.vendor_name+'</option>');
+			});
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+  });
+  
+});
+</script>
+</html>

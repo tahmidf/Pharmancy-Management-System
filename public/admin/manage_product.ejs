@@ -1,0 +1,190 @@
+<%include header%>
+
+
+<div class="row-fluid">
+    <div class="span12">
+            <div class="widget-title">
+                <h4><i class="icon-reorder"></i> MANAGE PRODUCT</h4>
+
+            </div>
+
+
+            <table id="productDetails" class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+                    <thead>
+                        <tr>
+                            <th><i class="icon-bullhorn"></i> Product Title</th>
+                            <th><i class="icon-bullhorn"></i> Category</th>
+                            <th><i class=""></i> Product Price</th>
+                              <th><i class=""></i> Action</th>
+
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                     
+
+                    </tbody>
+
+                </table>
+                    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h3 id="myModalLabel">Product details</h3>
+                        </div>
+                        <div class="modal-body">
+
+                            <table class="table table-striped">
+                                <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">Product Name:</span></td>
+                                    <td><input id="pro_name_new" type="text" placeholder=""></td>
+
+                                </tr>
+
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">Category:</span></td>
+                                    <td><input id="cat_new" 
+                                               type="text" placeholder=""></td>
+
+                                </tr>
+                             
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">Price:</span></td>
+                                    <td><input id="price_new" type="text"placeholder=""></td>
+
+                                </tr>
+                               
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-sm" data-dismiss="modal" aria-hidden="true">Close</button>
+                            <button data-dismiss="modal" onclick="saveData()" aria-hidden="true"
+                                    class="btn btn-primary btn-sm">Save changes
+                            </button>
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+
+              
+
+            </div> </div>
+
+
+
+
+<%include footer%>
+<script src="/vendor/ejs_production.js"></script>
+<script>
+    var data_product=[];
+        var rem;
+
+   $(document).ready(function() {
+     
+  $.ajax({
+      url: '/api/products',
+      method: "GET",
+      success: function(data) {
+         
+           $.each(data,function(i,data){
+             var s = "<a href='#myModal' onclick='show_product(\"" + data._id + "\")' role='button'  class='btn btn-primary btn-sm' data-toggle='modal'><i class='icon-eye-open'></i> Edit</a><button class='btn btn-danger btn-sm' onclick='deleteProduct(\"" + data._id + "\");'><i class='icon-trash '></i></button>"
+
+              $('#productDetails').dataTable().fnAddData( [
+              data.product_name,
+              data.product_category,
+              data.productprice,s
+             ]);
+             dataCopy(data._id,data.product_name,
+              data.product_category,
+              data.productprice);
+
+           });
+
+          },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+  });
+  
+  
+});
+function dataCopy(id,pro_name,cat,price){
+  
+ data_product.push([id,pro_name,price,cat]);
+
+}
+  
+  function show_product(r) {
+
+    for(var i=0;i<data_product.length;i++){
+        if(data_product[i][0]==r)
+        rem = i;
+    }
+      document.getElementById('pro_name_new').value = data_product[rem][1];
+      document.getElementById('cat_new').value = data_product[rem][3];
+      document.getElementById('price_new').value = data_product[rem][2];
+
+          
+        
+   }
+   function deleteProduct(r){
+            var chk = confirm("Are you sure to delete?");
+            if (chk) {
+       $.ajax({
+      url: '/api/products/'+r,
+      method: "DELETE",
+      success: function(data) {
+       alert("Product deleted");
+       window.location.replace("/manage-product");
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+
+      });
+    }
+   }
+   function saveData(){
+     
+    var product = {
+    product_name: "",
+    product_category:"",
+    productprice:null
+    };
+    
+    product.product_name =document.getElementById('pro_name_new').value
+    product.product_category=document.getElementById('cat_new').value
+    product.productprice =document.getElementById('price_new').value;
+    //console.log(product);
+      $.ajax({
+      method:"PUT",
+      url:'/api/products/edit/'+data_product[rem][0],
+      data: product
+    }).done(function(response){
+      alert("Data Updated");
+      window.location.replace("/manage-product");
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+   }
+
+  
+</script>
+
+</html>

@@ -1,0 +1,200 @@
+<%include header%>
+
+
+<div class="row">
+    <div class="box col-md-12">
+        <div class="box-inner">
+            <div class="box-header well">
+                <h2><i class="glyphicon glyphicon-info-sign"></i> Dashboard</h2>
+
+                <div class="box-icon">
+                    <a href="#" class="btn btn-minimize btn-round btn-default"><i
+                            class="glyphicon glyphicon-chevron-up"></i></a>
+                    <a href="#" class="btn btn-close btn-round btn-default"><i
+                            class="glyphicon glyphicon-remove"></i></a>
+                </div>
+            </div>
+            <div class="box-content row">
+                <div class="col-lg-7 col-md-7" style="">
+
+                  
+                  <h2 class="alert"><b>Welcome to,  Osudh Ano</b></h2>
+                       <p class="center-block download-buttons">
+                    <a href="/new-sale" class="btn btn-success"><i
+                                          class="icon-usd"></i> Add new Sale</a>
+                        <a href="/view-invoices" class="btn btn-danger"><i
+                                class="icon-eye-open"></i> View  invoice</a>
+                    </p>
+
+                              
+
+                </div>
+              
+                <div class="col-md-3">
+                    <h4>Ongoing delivery</h4>
+                       <table id="invoiceDetails" class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+                    <thead>
+                        <tr>
+                            <th><i class=""></i> Name</th>
+                            <th><i class=""></i> Quantity</th>
+                            <th><i class=""></i> Total</th>
+                            <th><i class=""></i>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                     
+
+                    </tbody>
+
+                </table>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+                    </div>
+
+
+
+<%include footer%>
+<script>
+    var sales= [];
+    var invoice= [];
+    var stock;
+
+    function deliveredUpdate(temp){
+        var customer = {
+        customer_del:'2'
+          };
+  //console.log(pro_id);
+  
+    var split = temp.split(",");
+            var invoiceID = split[0];
+            var quantity = split[1];
+            var pro_id = split[2];
+            
+       $.ajax({
+      method:"PUT",
+      url:'/api/customerInvoices/edit/'+invoiceID,
+      data: customer
+    }).done(function(response){
+     
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+    
+    var product = {
+    product_stock: 0
+    };
+
+
+   var old;
+   $.ajax({
+      url: '/api/products/'+pro_id,
+      method: "GET",
+       async: false,
+      success: function(data) {
+      old = parseInt(data.product_stock);
+      setStock(old);
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+  });
+  product.product_stock = stock-quantity;
+ //updating to product stock
+      $.ajax({
+      method:"PUT",
+      url:'/api/products/edit/'+pro_id,
+      data: product
+    }).done(function(response){
+     
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+    
+    alert("Delivered stock updated");
+   
+   
+    }
+     function setStock(a){
+      stock = a;   
+     }
+
+   function saleCopy(a){
+          sales.push([a._id,a.sale_product,a.sale_total,a.sale_quantity]);
+
+    }
+    function invoiceCopy(a){
+           makeInvoice(a);
+    }
+    
+    function makeInvoice(a){
+          for(var i=0;i<sales.length;i++){
+              if(sales[i][0]==a.sale_id){
+                  if(a.customer_del==1){
+              var s = "<a href='' onclick='deliveredUpdate(\"" + a._id+','+sales[i][3]+','+a.pro_id +"\")'  role='button'  class='btn btn-danger btn-sm'>Not delivered</a>"
+              $('#invoiceDetails').dataTable().fnAddData([
+               sales[i][1],sales[i][3],sales[i][2],s
+               ]);
+                  
+              }
+             }
+              
+          }
+      }
+          $(document).ready(function () {
+                 //get sales
+      $.ajax({
+      url: '/api/sales',
+      method: "GET",
+      success: function(data) {
+     
+              
+         $.each(data,function(i,data){
+               saleCopy(data);
+		 	});
+
+               
+			
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+
+      });
+      
+        $.ajax({
+      url: '/api/customerInvoices',
+      method: "GET",
+      success: function(data) {
+                        
+              
+         $.each(data,function(i,data){
+               invoiceCopy(data);
+               
+
+		 	});
+
+               
+			
+
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+
+      });
+   
+          
+              
+          });
+
+</script>
+</html>

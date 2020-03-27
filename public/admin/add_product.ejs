@@ -1,0 +1,91 @@
+
+<%include header%>
+  <div class="box col-md-7">
+                    <div class="box-inner">
+                        <div class="box-header well" data-original-title="">
+                            <h2><i class="glyphicon glyphicon-th"></i> Add details Panel</h2>
+
+                            <div class="box-icon">
+                                <a href="#" class="btn btn-minimize btn-round btn-default"><i
+                                            class="glyphicon glyphicon-chevron-up"></i></a>
+                            </div>
+                        </div>
+                  
+                        <div class="box-content">
+
+<div id="view">
+  <div class="panel panel-success">
+      <div class="panel-heading"><center>ADD PRODUCT FORM<center></div>
+        <table class="table table-hover">
+        <tbody>
+        <tr>
+          <td>Category Name</td>
+          <td><label><input type="text" class="form-control" id="category"></label></td>
+        </tr>
+        <tr>
+          <td>Product Name</td>
+          <td><label><input type="text" class="form-control" id="name"></label></td>
+        </tr>
+        <tr>
+          <td>Product Price</td>
+          <td><label><input type="text" class="form-control" id="price"></label></td>
+        </tr>
+     
+        <tr>
+          <td></td>
+          <td><button type="button" id="save_product" class="btn btn-success">SAVE</button></td>
+        </tr>
+      </tbody>
+    </table>
+      </div>
+</div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+<%include footer%>
+
+
+<script src="/vendor/ejs_production.js"></script>
+<script>
+var product = {
+    product_id: null,
+    product_name: "",
+    product_category:"",
+    productprice: null,
+    product_stock:0
+  };
+  $('#category').change(function(){
+    product.product_category = $('#category').val();
+  });
+  $('#name').change(function(){
+    product.product_name = $('#name').val();
+  });
+  $('#price').change(function(){
+    product.productprice = $('#price').val();
+  });
+  
+  product.product_id = new Date().getTime() + Math.random();
+
+  $('#save_product').click(function(){
+    $.ajax({
+      method:"POST",
+      url:'/api/products',
+      data: product
+    }).done(function(response){
+      $('#category').val('');
+      $('#name').val('');
+      $('#price').val('');
+      alert("The Product has been added");
+      console.log("Product has been added");
+      window.location.replace("/add_product");
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+  });
+  </script>
+</html>

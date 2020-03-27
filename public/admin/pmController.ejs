@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+      <meta charset="utf-8">
+      <title>Admin PM controller</title>
+
+
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="author" content="SHIELD">
+
+      <link id="bs-css" href="admin_asset/css/bootstrap-cerulean.min.css" rel="stylesheet">
+      <link href=" admin_asset/css/charisma-app.css  " rel="stylesheet">
+      <link href=" admin_asset/bower_components/fullcalendar/dist/fullcalendar.css  " rel="stylesheet">
+      <link href=" admin_asset/bower_components/fullcalendar/dist/fullcalendar.print.css  " rel="stylesheet" media="print">
+      <link href=" admin_asset/bower_components/chosen/chosen.min.css  " rel="stylesheet">
+      <link href=" admin_asset/bower_components/colorbox/example3/colorbox.css  " rel="stylesheet">
+      <link href=" admin_asset/bower_components/responsive-tables/responsive-tables.css  " rel="stylesheet">
+      <link href=" admin_asset/bower_components/bootstrap-tour/build/css/bootstrap-tour.min.css  " rel="stylesheet">
+      <link href=" admin_asset/css/jquery.noty.css  " rel="stylesheet">
+      <link href=" admin_asset/css/noty_theme_default.css  " rel="stylesheet">
+      <link href=" admin_asset/css/elfinder.theme.css  " rel="stylesheet">
+      <link href=" admin_asset/css/elfinder.min.css  " rel="stylesheet">
+      <link href=" admin_asset/css/jquery.iphone.toggle.css  " rel="stylesheet">
+      <link href=" admin_asset/assets/font-awesome/css/font-awesome.css  " rel="stylesheet" />
+
+      <link href=" admin_asset/css/uploadify.css  " rel="stylesheet">
+      <link href=" admin_asset/css/animate.min.css  " rel="stylesheet">
+
+      <script src=" admin_asset/bower_components/jquery/jquery.min.js  "></script>
+
+      <link rel="shortcut icon" href="/img/favicon.ico">
+
+
+</head>
+
+
+<body>
+    <div class="navbar navbar-default" role="navigation">
+
+
+        <div class="navbar-inner">
+            <button type="button" class="navbar-toggle pull-left animated flip">
+                <span class="sr-only">Menu</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+   <a class="navbar-brand" href="/"> <img alt="Logo" src="img/admin.png" height="100" width="100"/>
+                <span>Admin Panel</span></a>
+
+
+
+            <!-- user dropdown starts -->
+            <div class="btn-group pull-right">
+
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+               <img id="adminImg" src="" alt="" height="20" width="20"><span id="adminName" class="hidden-sm hidden-xs"></span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+
+                    <li><a href=" employee-profile  ">Profile</a></li>
+                    <li class="divider"></li>
+                    <li><a href="/auth/signout">Logout</a></li>
+                </ul>
+            </div>
+
+            <div class="btn-group pull-right theme-container animated tada">
+
+
+                <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+
+                    <i class="glyphicon glyphicon-tint"></i><span
+                        class="hidden-sm hidden-xs"> Change Theme</span>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" id="themes">
+                    <li><a data-value="cerulean" href="#"><i class="whitespace"></i> Default</a></li>
+                    <li><a data-value="night" href="#"><i class="whitespace"></i> Night Mode</a></li>
+                    <li><a data-value="simplex" href="#"><i class="whitespace"></i> Simple</a></li>
+                </ul>
+
+            </div>
+            <!-- theme selector ends -->
+
+            <ul class="collapse navbar-collapse nav navbar-nav top-menu">
+
+
+  </li>
+            </ul>
+
+        </div>
+    </div>
+<div class="ch-container">
+    <div class="row">
+
+        <div class="col-sm-2 col-lg-2">
+            <div class="sidebar-nav">
+                <div class="nav-canvas">
+                    <div class="nav-sm nav nav-stacked">
+
+                    </div>
+                    <ul class="nav nav-pills nav-stacked main-menu">
+                        <li class="nav-header">Main</li>
+                        <li><a class="ajax-link" href="/"><i class="glyphicon glyphicon-home"></i><span> Dashboard</span></a>
+                        </li>
+
+                <li><a class="ajax-link" href=" new-sale  "><i class="glyphicon glyphicon-shopping-cart"></i><span>New Sale</span></a>
+                </li>
+
+                <li class="accordion">
+                    <a href="#"><i class="glyphicon glyphicon-eye-open"></i><span> View Invoices </span></a>
+                    <ul class="nav nav-pills nav-stacked">
+                        <li><a href="view-invoices">Sale Invoice</a></li>
+                    </ul>
+                </li>
+      
+
+
+
+
+                        </div>
+            </div>
+        </div>
+        <!--/span-->
+        <!-- left menu ends -->
+
+
+        <div id="content" class="col-lg-10 col-sm-10">
+          <div>
+        <ul class="breadcrumb">
+        <li>
+          <a href="/">Home</a>
+        </li>
+        <li>
+        </li>
+        </ul>
+        </div>
+
+<style>
+
+.stepwizard-step p {
+    margin-top: 10px;
+}
+.stepwizard-row {
+    display: table-row;
+}
+.stepwizard {
+    display: table;
+    width: 50%;
+    position: relative;
+}
+.stepwizard-step button[disabled] {
+    opacity: 1 !important;
+    filter: alpha(opacity=100) !important;
+}
+.stepwizard-row:before {
+    top: 14px;
+    bottom: 0;
+    position: absolute;
+    content: " ";
+    width: 100%;
+    height: 1px;
+    background-color: #ccc;
+    z-order: 0;
+}
+.stepwizard-step {
+    display: table-cell;
+    text-align: center;
+    position: relative;
+}
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 12px;
+    line-height: 1.428571429;
+    border-radius: 15px;
+}
+  body {
+  color: #333;
+}
+
+body, input, button {
+  line-height: 1.4;
+  font: 13px Helvetica,arial,freesans,clean,sans-serif;
+}
+.pac-container{
+    z-index: 10000 !important;
+  }
+a {
+  color: #4183C4;
+  text-decoration: none;
+}
+
+#examples a {
+  text-decoration: underline;
+}
+
+#geocomplete { width: 200px}
+
+.map_canvas { 
+  width: 300px; 
+  height: 300px; 
+  margin: 10px 20px 10px 0;
+}
+
+#multiple li { 
+  cursor: pointer; 
+  text-decoration: underline; 
+}
+
+</style>
+<div class="container">
+<div class="stepwizard col-md-offset-3">
+    <div class="stepwizard-row setup-panel">
+      <div class="stepwizard-step">
+        <a href="#step-1" type="button" class="btn btn-primary btn-circle">1</a>
+        <p>Step 1</p>
+      </div>
+   
+      <div class="stepwizard-step">
+        <a href="#step-3" type="button" class="btn btn-default btn-circle" disabled="disabled">2</a>
+        <p>Step 2</p>
+      </div>
+    </div>
+  </div>
+  
+    <div class="row setup-content" id="step-1">
+      <div class="col-xs-6 col-md-offset-3">
+        <div class="col-md-12">
+          <h3> Login Info</h3>
+          <div class="form-group">
+            <label class="control-label">First Name</label>
+            <input  maxlength="100" id="firstName" type="text" required="required" class="form-control" placeholder="Enter First Name"  />
+          </div>
+          <div class="form-group">
+            <label class="control-label">Last Name</label>
+            <input maxlength="100" id="lastName" type="text" required="required" class="form-control" placeholder="Enter Last Name" />
+          </div>
+          <div class="form-group">
+            <label class="control-label">Email</label>
+            <input required="required" id="email" class="form-control" placeholder="Enter your Email" ></input>
+          </div>
+          <div class="form-group">
+            <label class="control-label">Password</label>
+            <input required="required" id="pass" type="password" class="form-control" placeholder="Enter your Email" ></input>
+          </div>
+            <div class="form-group">
+            <label class="control-label">Username</label>
+            <input required="required" id="username" class="form-control" placeholder="Enter your Username" ></input>
+          </div>
+          <button class="btn btn-primary nextBtn btn-sm pull-right" id="saveUser" type="button" >Next</button>
+        </div>
+      </div>
+    </div>
+    <div class="row setup-content" id="step-3">
+      <div class="col-xs-6 col-md-offset-3">
+        <div class="col-md-12">
+          <h3> Information (Admin PM)</h3>
+           <table class="table table-hover">
+        <tbody>
+        <tr>
+          <td>Login Username: </td>
+          <td><label id="userNameDisplay" ></label></td>
+        </tr>
+        <tr>
+          <td>Password: </td>
+          <td><label id="passDisplay" ></label></td>
+        </tr>
+        <tr>
+          <td>User ID: </td>
+          <td><label id="pmDisplay" ></label></td>
+        </tr>
+     
+      </tbody>
+    </table>
+        </div>
+      </div>
+    </div>
+
+</div>
+
+
+    </div>
+
+</div>
+
+
+    <hr>
+
+
+
+
+</div>
+
+
+<script src=" admin_asset/bower_components/bootstrap/dist/js/bootstrap.min.js  "></script>
+
+<script src=" admin_asset/js/jquery.cookie.js  "></script>
+<script src=" admin_asset/bower_components/moment/min/moment.min.js  "></script>
+<script src=" admin_asset/bower_components/fullcalendar/dist/fullcalendar.min.js  "></script>
+<script src=" admin_asset/js/jquery.dataTables.min.js  "></script>
+
+<script src=" admin_asset/bower_components/chosen/chosen.jquery.min.js  "></script>
+<script src=" admin_asset/bower_components/colorbox/jquery.colorbox-min.js  "></script>
+<script src=" admin_asset/js/jquery.noty.js  "></script>
+<script src=" admin_asset/bower_components/responsive-tables/responsive-tables.js  "></script>
+<script src=" admin_asset/bower_components/bootstrap-tour/build/js/bootstrap-tour.min.js  "></script>
+<script src=" admin_asset/js/jquery.raty.min.js  "></script>
+<script src=" admin_asset/js/jquery.iphone.toggle.js  "></script>
+<script src=" admin_asset/js/jquery.autogrow-textarea.js  "></script>
+<script src=" admin_asset/js/jquery.uploadify-3.1.min.js  "></script>
+<script src=" admin_asset/js/jquery.history.js  "></script>
+<script src=" admin_asset/js/jquery.history.js  "></script>
+<script src="/admin_asset/js/charisma.js"></script>
+
+
+
+</body>
+</html>
+
+<script src="/vendor/ejs_production.js"></script>
+<script>
+var userID;
+    var user = {
+    firstName: "",
+    lastName: "",
+    email:"",
+    roles:[""],
+    username:"",
+    password:""
+  };
+  
+  $('#firstName').change(function(){
+    user.firstName =$('#firstName').val();
+  });
+  $('#lastName').change(function(){
+    user.lastName = $('#lastName').val();
+  });
+  $('#email').change(function(){
+    user.email = $('#email').val();
+  });
+  $('#username').change(function(){
+    user.username = $('#username').val();
+  });
+   $('#pass').change(function(){
+    user.password = $('#pass').val();
+  });
+  
+
+ 
+    $('#saveUser').click(function(){
+      user.roles = ["admin"];
+    $.ajax({
+      method:"POST",
+      url:'/auth/signup',
+      data: user
+    }).done(function(response){
+       copyUserID(response._id)
+      alert("The Admin has been added");
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+ 
+});
+
+function copyUserID(id){
+  userID = id;
+  
+document.getElementById('pmDisplay').innerHTML=userID;
+document.getElementById('userNameDisplay').innerHTML=user.email;
+document.getElementById('passDisplay').innerHTML=user.password;
+
+ 
+}
+
+
+var a= sessionStorage.getItem("session");     
+ var b=JSON.parse(a);
+             
+$(document).ready(function () {
+  
+    document.getElementById('adminName').innerHTML = b.firstName;
+    document.getElementById('adminImg').src = b.photo;
+                
+  var navListItems = $('div.setup-panel div a'),
+          allWells = $('.setup-content'),
+          allNextBtn = $('.nextBtn');
+
+  allWells.hide();
+
+  navListItems.click(function (e) {
+      e.preventDefault();
+      var $target = $($(this).attr('href')),
+              $item = $(this);
+
+      if (!$item.hasClass('disabled')) {
+          navListItems.removeClass('btn-primary').addClass('btn-default');
+          $item.addClass('btn-primary');
+          allWells.hide();
+          $target.show();
+          $target.find('input:eq(0)').focus();
+      }
+  });
+
+  allNextBtn.click(function(){
+      var curStep = $(this).closest(".setup-content"),
+          curStepBtn = curStep.attr("id"),
+          nextStepWizard = $('div.setup-panel div a[href="#' + curStepBtn + '"]').parent().next().children("a"),
+          curInputs = curStep.find("input[type='text'],input[type='url']"),
+          isValid = true;
+
+      $(".form-group").removeClass("has-error");
+      for(var i=0; i<curInputs.length; i++){
+          if (!curInputs[i].validity.valid){
+              isValid = false;
+              $(curInputs[i]).closest(".form-group").addClass("has-error");
+          }
+      }
+
+      if (isValid)
+          nextStepWizard.removeAttr('disabled').trigger('click');
+  });
+
+  $('div.setup-panel div a.btn-primary').trigger('click');
+});
+
+  </script>

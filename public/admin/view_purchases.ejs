@@ -1,0 +1,174 @@
+<%include header%>
+
+
+<div class="row-fluid">
+    <div class="span12">
+            <div class="widget-title">
+                <h4><i class="icon-reorder"></i> View all purchases</h4>
+
+            </div>
+
+
+            <table id="productDetails" class="table table-striped table-bordered bootstrap-datatable datatable responsive">
+                    <thead>
+                        <tr>
+                            <th><i class="icon-bullhorn"></i> Date</th>
+                            <th><i class="icon-bullhorn"></i> Product</th>
+                            <th><i class=""></i>Quantity</th>
+                         <th><i class=""></i>Vendor</th>
+                        
+
+                              <th><i class=""></i> Action</th>
+
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                     
+
+                    </tbody>
+
+                </table>
+                    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                 aria-hidden="true">
+
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                            <h3 id="myModalLabel">Details</h3>
+                        </div>
+                        <div class="modal-body">
+                                <span id="vendorName" class="alert btn-danger">Vendor name:</span>
+                                <br>
+                                <br>
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                    <td></td>
+                                    <td><span class="">Purchase Conduct date:</span></td>
+                                    <td ><span id="date"></span></td>
+
+                                </tr>
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">ID:</span></td>
+                                    <td ><span id="invoiceID"></span></td>
+
+                                </tr>
+
+                                <tr>
+                                     <td></td>
+                                    <td><span class="">Product:</span></td>
+                                    <td ><span id="product"></span></td>
+
+                                </tr>
+                             
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">Quantity:</span></td>
+                                    <td ><span id="quantity"></span></td>
+
+                                </tr>
+                             
+                                <tr>
+                                    <td></td>
+                                    <td><span class="">Total Price:</span></td>
+                                    <td ><span id="total"></span></td>
+
+                                </tr>
+                               
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-sm" data-dismiss="modal" aria-hidden="true">Close</button>
+                      
+                        </div>
+
+
+                    </div>
+                </div>
+
+            </div>
+
+
+              
+
+            </div> </div>
+
+
+
+
+<%include footer%>
+<script src="/vendor/ejs_production.js"></script>
+<script>
+    var data_product=[];
+        var rem;
+
+   $(document).ready(function() {
+     
+  $.ajax({
+      url: '/api/purchases',
+      method: "GET",
+      success: function(data) {
+         
+           $.each(data,function(i,data){
+             var s = "<a href='#myModal' onclick='show_product(\"" + data._id + "\")' role='button'  class='btn btn-primary btn-sm' data-toggle='modal'><i class='icon-eye-open'></i> View</a>"
+
+              $('#productDetails').dataTable().fnAddData( [
+              data.created,
+              data.purchase_productName,
+              data.purchase_quantity,
+              data.vendorName,s
+             ]);
+             dataCopy( data._id,
+              data.vendorName,
+              data.purchase_productName,
+              data.purchasetotalPrice,
+              data.purchase_quantity,
+              data.created);
+
+           });
+
+          },
+      error: function(jqXHR, textStatus, errorThrown) {
+          alert('error ' + textStatus + " " + errorThrown);
+      }
+  });
+  
+  
+});
+function dataCopy(id,vendor,product,total,quantity,date){
+  
+ data_product.push([id,vendor,product,total,quantity,date]);
+
+}
+  
+  function show_product(r) {
+
+    for(var i=0;i<data_product.length;i++){
+        if(data_product[i][0]==r)
+        rem = i;
+    }
+      document.getElementById('invoiceID').innerHTML = data_product[rem][0];
+      document.getElementById('product').innerHTML = data_product[rem][2];
+      document.getElementById('quantity').innerHTML = data_product[rem][4];
+      document.getElementById('total').innerHTML = data_product[rem][3];
+      document.getElementById('date').innerHTML = data_product[rem][5];
+            document.getElementById('vendorName').innerHTML = "Vendor Name: "+data_product[rem][1];
+
+
+
+
+          
+        
+   }
+
+  
+</script>
+
+</html>

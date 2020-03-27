@@ -1,0 +1,100 @@
+<%include header%>
+
+<div class="row-fluid">
+    <div class="span12">
+            <div class="widget-title">
+                <h4><i class="icon-reorder"></i>Add Supplyer Form </h4>
+
+            </div>
+                  <table class="table table-striped">
+                   <tbody>
+                     <tr>
+                          <td> <label class="control-label">Supplyer Name:</label> </td>
+                          <td><input type="text" id="supplyerName" class="span6 " required/></td>
+
+
+
+                     </tr>
+                     <tr>
+                         <td> <label class="control-label">Supplyer Email:</label> </td>
+                         <td><input type="text" id="supplyerEmail" class="span6 " /></td>
+
+
+
+                     </tr>
+                     <tr>
+                         <td> <label class="control-label">Supplyer Phone:</label> </td>
+                         <td><input type="text" id="supplyerPhone" class="span6 " /></td>
+
+
+
+                     </tr>
+                     <tr>
+                         <td> <label class="control-label">Supplyer Address:</label> </td>
+                         <td><textarea id='supplyerAddress' rows='5' cols="40"></textarea></td>
+
+
+
+                     </tr>
+                  
+
+                                      
+                                       </tbody></table>
+
+
+                    <div class="form-actions">
+                        <button type="submit" id="submitBtn" class="btn btn-success btn-sm">Submit</button>
+
+                    </div>
+            </div>
+        </div>
+
+<%include footer%>
+
+<script src="/vendor/ejs_production.js"></script>
+<script>
+var vendor = {
+    vendor_name: "",
+    vendor_phone:"",
+    vendor_address: null,
+    vendor_email: null,
+    vendorID:null
+  };
+  $('#supplyerName').change(function(){
+    vendor.vendor_name = $('#supplyerName').val();
+  });
+  $('#supplyerPhone').change(function(){
+    vendor.vendor_phone = $('#supplyerPhone').val();
+  });
+  $('#supplyerEmail').change(function(){
+    vendor.vendor_email = $('#supplyerEmail').val();
+  });
+  $('#supplyerAddress').change(function(){
+    vendor.vendor_address = $('#supplyerAddress').val();
+  });
+ 
+  vendor.vendorID = new Date().getTime() + Math.random();
+ 
+  $('#submitBtn').click(function(){
+    $.ajax({
+      method:"POST",
+      url:'/api/vendors',
+      data: vendor
+    }).done(function(response){
+      $('#supplyerName').val('');
+      $('#supplyerPhone').val('');
+      $('#supplyerEmail').val('');
+      $('#supplyerAddress').val('');
+ 
+      
+      alert("Supplyer Added");
+      
+      window.location.replace("/supplier");
+    }).fail(function(response){
+      $("#error").text(JSON.parse(response.responseText).message);
+        alert(JSON.parse(response.responseText).message);
+    });
+  });
+  </script>
+
+</html>
